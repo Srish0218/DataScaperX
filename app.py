@@ -8,7 +8,7 @@ import csv
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import os
+
 
 # Function to get data from URL
 def get_data(URL):
@@ -28,37 +28,40 @@ def get_data(URL):
     st.metric(label="Price", value=price)
     return title, price
 
+
 # Function to send email
 def send_email(title, price, URL):
     try:
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-        server.login('srishtijaitly2002@gmail.com',  'esylrglmynyfwyqc')
+        server.login('srishtijaitly2002@gmail.com', 'esylrglmynyfwyqc')
     except smtplib.SMTPException as e:
         st.error(f"Failed to connect to email server. Error: {e}")
         return
 
     subject = f"The Product {title} you want is now {price}! Now is your chance to buy!"
     body = (f"The Product {title} you want is now {price}! Now is your chance to buy! "
-            f"Dear User, This is the moment we have been waiting for. Now is your chance to pick up the product of your dreams. Don't miss it! Link here: {URL}")
+            f"Dear User, This is the moment we have been waiting for. Now is your chance to pick up the product of "
+            f"your dreams. Don't miss it! Link here: {URL}")
 
     msg = MIMEMultipart()
     msg['From'] = 'srishtijaitly2002@gmail.com'
-    msg['To'] =  'sjaitly0218@gmail.com'
+    msg['To'] = 'sjaitly0218@gmail.com'
     msg['Subject'] = subject
     msg.attach(MIMEText(body.encode('utf-8'), 'plain', 'utf-8'))
 
     try:
-        server.sendmail('srishtijaitly2002@gmail.com',  'sjaitly0218@gmail.com', msg.as_string())
-        st.toast("Email sent successfully!" , icon='🎉')
+        server.sendmail('srishtijaitly2002@gmail.com', 'sjaitly0218@gmail.com', msg.as_string())
+        st.toast("Email sent successfully!", icon='🎉')
     except smtplib.SMTPException as e:
         st.error(f"Failed to send email. Error: {e}")
     finally:
         server.quit()
 
+
 # Function to scrape and track data from Flipkart
 def scrape_and_track():
     URL = st.text_input("URL", "")
-    price_threshold =1000
+    price_threshold = 1000
     if URL:
         title, price = get_data(URL)
         if title is not None and price is not None:
@@ -87,6 +90,7 @@ def scrape_and_track():
                 st.error(f"Failed to read CSV file. Error: {e}")
     else:
         st.warning("Enter Flipkart Link")
+
 
 # Function to scrape data from GeeksForGeeks
 def gfg():
@@ -118,6 +122,7 @@ def gfg():
     else:
         st.warning("Enter Link")
 
+
 # Function to scrape data from Coursera
 def coursera():
     URL = st.text_input("URL", "")
@@ -141,10 +146,11 @@ def coursera():
         description_element = soup.find('p', class_="css-4s48ix")
         description = description_element.get_text().strip() if description_element else "No Description"
         description_excluded_words = ['Learn more']
-        description = re.sub(r'\b(?:{})\b'.format('|'.join(description_excluded_words)), '', description, flags=re.IGNORECASE)
+        description = re.sub(r'\b(?:{})\b'.format('|'.join(description_excluded_words)), '', description,
+                             flags=re.IGNORECASE)
 
         type_element = soup.find('h2', class_='cds-119 cds-Typography-base css-h1jogs cds-121')
-        type = type_element.get_text() if type_element else "No Content"
+        types = type_element.get_text() if type_element else "No Content"
 
         rating_element = soup.find('div', class_='cds-119 cds-Typography-base css-h1jogs cds-121')
         rating = rating_element.get_text().strip() if rating_element else "No Rating"
@@ -157,19 +163,22 @@ def coursera():
             st.image(image_url)
         st.subheader("Description")
         st.write(description)
-        st.subheader(type)
+        st.subheader(types)
         st.metric(label='Rating', value=rating + '⭐')
         st.subheader('Skills You Will Gain')
         st.write(skills)
+
 
 # Main UI
 st.header("DataScaperX 🕸️")
 st.markdown("---")
 
 headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 "
+                  "Safari/537.36",
     "Accept-Encoding": "gzip, deflate, br, zstd",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,"
+              "application/signed-exchange;v=b3;q=0.7",
     "Connection": "close",
     "Upgrade-Insecure-Requests": "1"
 }
