@@ -62,7 +62,7 @@ def send_email(title, price, URL):
 def scrape_and_track():
     URL = st.text_input("URL", "")
     price_threshold = 1000
-    if URL:
+    if st.button('Scrape') and URL:
         title, price = get_data(URL)
         if title is not None and price is not None:
             today = datetime.date.today()
@@ -95,7 +95,7 @@ def scrape_and_track():
 # Function to scrape data from GeeksForGeeks
 def gfg():
     URL = st.text_input("URL", "")
-    if URL:
+    if st.button('Scrape') and URL:
         try:
             page = requests.get(URL, headers=headers)
             page.raise_for_status()
@@ -126,7 +126,7 @@ def gfg():
 # Function to scrape data from Coursera
 def coursera():
     URL = st.text_input("URL", "")
-    if not URL:
+    if not URL and not st.button('Scrape') :
         st.warning("Enter Link")
     else:
         try:
@@ -169,6 +169,9 @@ def coursera():
         st.write(skills)
 
 
+def yt():
+    pass
+
 # Main UI
 st.header("DataScaperX 🕸️")
 st.markdown("---")
@@ -183,8 +186,11 @@ headers = {
     "Upgrade-Insecure-Requests": "1"
 }
 
-website = st.selectbox("Select Website:", ["", "Flipkart", "GeeksForGeeks", "Coursera"])
-
+website = st.selectbox("Select Website:", ["", "Flipkart", "GeeksForGeeks", "Coursera" , "Youtube"])
+with st.popover("Instructions"):
+    st.write("For Flipkart , Enter URL of Product Page Only!")
+    st.write("For GFG , Enter URL of article page only not home page")
+    st.write("For Coursera, Enter URL of Course or professional certificate info page!")
 if website:
     if website == "Flipkart":
         scrape_and_track()
@@ -192,3 +198,5 @@ if website:
         gfg()
     elif website == "Coursera":
         coursera()
+    elif website == "Youtube":
+        yt()
