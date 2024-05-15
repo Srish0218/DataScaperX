@@ -171,7 +171,7 @@ headers = {
     "Upgrade-Insecure-Requests": "1"
 }
 
-website = st.selectbox("Select Website:", ["", "Flipkart", "GeeksForGeeks", "Coursera", "Youtube"])
+website = st.selectbox("Select Website:", ["Flipkart", "GeeksForGeeks", "Coursera", "Youtube"])
 with st.popover("Instructions"):
     st.write("For Flipkart , Enter URL of Product Page Only!")
     st.write("For GFG , Enter URL of article page only not home page")
