@@ -17,6 +17,7 @@ def get_data(URL):
         page.raise_for_status()
     except requests.RequestException as e:
         st.error(f"Failed to fetch the page. Error: {e}")
+        st.warning("Due to repetitive Tries Flipkart has blocked. You can still scrape Flipkart on http://localhost:8501/ after running the app 'Streamlit run app.py'.")
         return None, None
 
     soup = BeautifulSoup(page.content, "html.parser")
@@ -78,7 +79,6 @@ def scrape_and_track(URL):
                 send_email(title, price, URL)
         except ValueError as e:
             st.error(f"Failed to parse price. Error: {e}")
-            st.warning("Due to repetitive Tries Flipkart has blocked. You can still scrape Flipkart on http://localhost:8501/ after running the app 'Streamlit run app.py'.")
 
         try:
             df = pd.read_csv('FlipkartWebScraperDataset.csv', header=None)
