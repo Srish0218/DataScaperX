@@ -59,118 +59,103 @@ def send_email(title, price, URL):
 
 
 # Function to scrape and track data from Flipkart
-def scrape_and_track():
-    URL = st.text_input("URL", "")
+def scrape_and_track(URL):
     price_threshold = 1000
-    if st.button('Scrape') and URL:
-        title, price = get_data(URL)
-        if title is not None and price is not None:
-            today = datetime.date.today()
-            try:
-                with open('FlipkartWebScraperDataset.csv', 'a+', newline='', encoding='UTF8') as f:
-                    writer = csv.writer(f)
-                    writer.writerow([title, price, today])
-            except IOError as e:
-                st.error(f"Failed to write to CSV file. Error: {e}")
-                return
+    title, price = get_data(URL)
+    if title is not None and price is not None:
+        today = datetime.date.today()
+        try:
+            with open('FlipkartWebScraperDataset.csv', 'a+', newline='', encoding='UTF8') as f:
+                writer = csv.writer(f)
+                writer.writerow([title, price, today])
+        except IOError as e:
+            st.error(f"Failed to write to CSV file. Error: {e}")
+            return
 
-            try:
-                price_value = float(price.replace('₹', '').replace(',', ''))
-                if price_value < price_threshold:
-                    send_email(title, price, URL)
-            except ValueError as e:
-                st.error(f"Failed to parse price. Error: {e}")
+        try:
+            price_value = float(price.replace('₹', '').replace(',', ''))
+            if price_value < price_threshold:
+                send_email(title, price, URL)
+        except ValueError as e:
+            st.error(f"Failed to parse price. Error: {e}")
 
-            try:
-                df = pd.read_csv('FlipkartWebScraperDataset.csv', header=None)
-                df_recent = df.tail(5).rename(columns={0: "Title", 1: "Price", 2: "Date"})
-                st.write("Recent values: ")
-                st.write(df_recent)
-            except (IOError, pd.errors.ParserError) as e:
-                st.error(f"Failed to read CSV file. Error: {e}")
-    else:
-        st.warning("Enter Flipkart Link")
+        try:
+            df = pd.read_csv('FlipkartWebScraperDataset.csv', header=None)
+            df_recent = df.tail(5).rename(columns={0: "Title", 1: "Price", 2: "Date"})
+            st.write("Recent values: ")
+            st.write(df_recent)
+        except (IOError, pd.errors.ParserError) as e:
+            st.error(f"Failed to read CSV file. Error: {e}")
 
 
 # Function to scrape data from GeeksForGeeks
-def gfg():
-    URL = st.text_input("URL", "")
-    if st.button('Scrape') and URL:
-        try:
-            page = requests.get(URL, headers=headers)
-            page.raise_for_status()
-        except requests.RequestException as e:
-            st.error(f"Failed to fetch the page. Error: {e}")
-            return
+def gfg(URL):
+    try:
+        page = requests.get(URL, headers=headers)
+        page.raise_for_status()
+    except requests.RequestException as e:
+        st.error(f"Failed to fetch the page. Error: {e}")
+        return
 
-        soup = BeautifulSoup(page.content, "html.parser")
-        title_element = soup.find('h1', class_='entry-title') or soup.find('div', class_='article-title')
-        title = title_element.get_text().strip() if title_element else "Title not found"
+    soup = BeautifulSoup(page.content, "html.parser")
+    title_element = soup.find('h1', class_='entry-title') or soup.find('div', class_='article-title')
+    title = title_element.get_text().strip() if title_element else "Title not found"
 
-        content_element = soup.find('div', class_='page_content') or soup.find('article', class_='content')
-        content = content_element.get_text() if content_element else "No Content"
+    content_element = soup.find('div', class_='page_content') or soup.find('article', class_='content')
+    content = content_element.get_text() if content_element else "No Content"
 
-        excluded_words = [
-            'Share your thoughts in the comments', 'Please Login to comment', 'Add Your Comment',
-            'Improve', 'Like Article', 'Like', 'Save', 'Share',
-            'Report', 'Suggest improvement', 'Previous', 'Next'
-        ]
-        content = re.sub(r'\b(?:{})\b'.format('|'.join(excluded_words)), '', content, flags=re.IGNORECASE)
+    excluded_words = [
+        'Share your thoughts in the comments', 'Please Login to comment', 'Add Your Comment',
+        'Improve', 'Like Article', 'Like', 'Save', 'Share',
+        'Report', 'Suggest improvement', 'Previous', 'Next'
+    ]
+    content = re.sub(r'\b(?:{})\b'.format('|'.join(excluded_words)), '', content, flags=re.IGNORECASE)
 
-        st.metric(label="Title", value=title)
-        st.write(content)
-    else:
-        st.warning("Enter Link")
+    st.metric(label="Title", value=title)
+    st.write(content)
 
 
 # Function to scrape data from Coursera
-def coursera():
-    URL = st.text_input("URL", "")
-    if not URL and not st.button('Scrape') :
-        st.warning("Enter Link")
-    else:
-        try:
-            page = requests.get(URL, headers=headers)
-            page.raise_for_status()
-        except requests.RequestException as e:
-            st.error(f"Failed to fetch the page. Error: {e}")
-            return
+def coursera(URL):
+    try:
+        page = requests.get(URL, headers=headers)
+        page.raise_for_status()
+    except requests.RequestException as e:
+        st.error(f"Failed to fetch the page. Error: {e}")
+        return
 
-        soup = BeautifulSoup(page.content, "html.parser")
-        title_element = soup.find('h1', class_='cds-119 cds-Typography-base css-1xy8ceb cds-121')
-        title = title_element.get_text().strip() if title_element else "Title not found"
+    soup = BeautifulSoup(page.content, "html.parser")
+    title_element = soup.find('h1', class_='cds-119 cds-Typography-base css-1xy8ceb cds-121')
+    title = title_element.get_text().strip() if title_element else "Title not found"
 
-        image_element = soup.find('img', class_='css-1f9gt0j')
-        image_url = image_element['src'] if image_element else None
+    image_element = soup.find('img', class_='css-1f9gt0j')
+    image_url = image_element['src'] if image_element else None
 
-        description_element = soup.find('p', class_="css-4s48ix")
-        description = description_element.get_text().strip() if description_element else "No Description"
-        description_excluded_words = ['Learn more']
-        description = re.sub(r'\b(?:{})\b'.format('|'.join(description_excluded_words)), '', description,
-                             flags=re.IGNORECASE)
+    description_element = soup.find('p', class_="css-4s48ix")
+    description = description_element.get_text().strip() if description_element else "No Description"
+    description_excluded_words = ['Learn more']
+    description = re.sub(r'\b(?:{})\b'.format('|'.join(description_excluded_words)), '', description,
+                         flags=re.IGNORECASE)
 
-        type_element = soup.find('h2', class_='cds-119 cds-Typography-base css-h1jogs cds-121')
-        types = type_element.get_text() if type_element else "No Content"
+    type_element = soup.find('h2', class_='cds-119 cds-Typography-base css-h1jogs cds-121')
+    types = type_element.get_text() if type_element else "No Content"
 
-        rating_element = soup.find('div', class_='cds-119 cds-Typography-base css-h1jogs cds-121')
-        rating = rating_element.get_text().strip() if rating_element else "No Rating"
+    rating_element = soup.find('div', class_='cds-119 cds-Typography-base css-h1jogs cds-121')
+    rating = rating_element.get_text().strip() if rating_element else "No Rating"
 
-        skills_element = soup.find('ul', class_='css-yk0mzy')
-        skills = [item.get_text() for item in skills_element.find_all('li')] if skills_element else []
+    skills_element = soup.find('ul', class_='css-yk0mzy')
+    skills = [item.get_text() for item in skills_element.find_all('li')] if skills_element else []
 
-        st.metric(label="Title", value=title)
-        if image_url:
-            st.image(image_url)
-        st.subheader("Description")
-        st.write(description)
-        st.subheader(types)
-        st.metric(label='Rating', value=rating + '⭐')
-        st.subheader('Skills You Will Gain')
-        st.write(skills)
+    st.metric(label="Title", value=title)
+    if image_url:
+        st.image(image_url)
+    st.subheader("Description")
+    st.write(description)
+    st.subheader(types)
+    st.metric(label='Rating', value=rating + '⭐')
+    st.subheader('Skills You Will Gain')
+    st.write(skills)
 
-
-def yt():
-    pass
 
 # Main UI
 st.header("DataScaperX 🕸️")
@@ -186,17 +171,21 @@ headers = {
     "Upgrade-Insecure-Requests": "1"
 }
 
-website = st.selectbox("Select Website:", ["", "Flipkart", "GeeksForGeeks", "Coursera" , "Youtube"])
+website = st.selectbox("Select Website:", ["", "Flipkart", "GeeksForGeeks", "Coursera", "Youtube"])
 with st.popover("Instructions"):
     st.write("For Flipkart , Enter URL of Product Page Only!")
     st.write("For GFG , Enter URL of article page only not home page")
     st.write("For Coursera, Enter URL of Course or professional certificate info page!")
 if website:
     if website == "Flipkart":
-        scrape_and_track()
+        url = st.text_input("URL", "")
+        if st.button('Scrape') and url:
+            scrape_and_track(url)
     elif website == "GeeksForGeeks":
-        gfg()
+        url = st.text_input("URL", "")
+        if st.button('Scrape') and url:
+            gfg(url)
     elif website == "Coursera":
-        coursera()
-    elif website == "Youtube":
-        yt()
+        url = st.text_input("URL", "")
+        if st.button('Scrape') and url:
+            coursera(url)
