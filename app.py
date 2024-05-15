@@ -78,6 +78,8 @@ def scrape_and_track(URL):
                 send_email(title, price, URL)
         except ValueError as e:
             st.error(f"Failed to parse price. Error: {e}")
+            if '500 Server Error' in e:
+                st.warning("Due to repetitive Tries Flipkart has blocked. You can still scrape Flipkart on http://localhost:8501/ after running the app 'Streamlit run app.py'.")
 
         try:
             df = pd.read_csv('FlipkartWebScraperDataset.csv', header=None)
@@ -189,3 +191,47 @@ if website:
         url = st.text_input("URL", "")
         if st.button('Scrape') and url:
             coursera(url)
+
+footer = """<style>
+a:link , a:visited{
+color: black;
+font-weight: bold;
+background-color: transparent;
+text-decoration: underline;
+}
+
+a:hover,  a:active {
+color: red;
+background-color: transparent;
+text-decoration: underline;
+}
+
+
+.footer a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+.footer {
+position: fixed;
+left: 0;
+bottom: 0;
+width: 100%;
+color: white;
+text-align: center;
+z-index:100;
+background: rgba(255, 255, 255, 0.05);
+backdrop-filter: blur(90%);
+border-radius: 10px;
+box-shadow: 0 8px 32px 0 rgba(255, 255, 255, 0.15);
+backdrop-filter: blur( 4px );
+-webkit-backdrop-filter: blur( 4px );
+        }
+}
+</style>
+
+<div class="footer">
+<p>Developed with ❤ by <a style='display: block; text-align: center;' href="https://github.com/Srish0218" target="_blank">Srishti Jaitly 🌸</a></p>
+</div>
+"""
+st.markdown(footer, unsafe_allow_html=True)
